@@ -40,6 +40,6 @@
 
     <br>
     <a href="index.jsp">Volver al formulario</a><br>
-    <a href="formVenta.jsp">Ir a Ventas</a>
+    <a href="VentaServlet">Ir a Ventas</a>
 </body>
 </html>
