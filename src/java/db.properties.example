@@ -1,0 +1,4 @@
+# Copiar como db.properties (no se sube a git) y poner los datos locales
+db.url=jdbc:mysql://localhost:3306/sigev_db
+db.usuario=root
+db.contrasena=CAMBIAR
