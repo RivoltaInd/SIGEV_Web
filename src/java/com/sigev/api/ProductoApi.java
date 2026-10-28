@@ -120,8 +120,13 @@ public class ProductoApi extends HttpServlet {
         if (json == null) {
             return "El cuerpo de la petición debe ser JSON";
         }
-        if (ApiUtil.texto(json, "nombre") == null) {
-            return "El nombre es obligatorio";
+        String nombre = ApiUtil.texto(json, "nombre");
+        if (nombre == null || nombre.length() > 100) {
+            return "El nombre es obligatorio y de máximo 100 caracteres";
+        }
+        String categoria = ApiUtil.texto(json, "categoria");
+        if (categoria != null && categoria.length() > 50) {
+            return "La categoría debe tener máximo 50 caracteres";
         }
         Double precio = ApiUtil.decimal(json, "precio");
         if (precio == null || precio <= 0) {

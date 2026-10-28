@@ -1,0 +1,59 @@
+/* Paginas de error de SIGEV_Web con la paleta del logo (magenta -> morado -> navy).
+   Sin JavaScript ni recursos externos. */
+:root {
+  --magenta: #c0168f;
+  --violeta: #5b1fd1;
+  --morado: #6b21a8;
+  --navy: #1e2b5e;
+  --tinta: #1a0b3d;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(135deg, #c0168f 0%, #6b21a8 45%, #1e2b5e 100%);
+  background-size: 200% 200%;
+  animation: fondo 12s ease infinite;
+}
+.tarjeta {
+  width: 100%;
+  max-width: 500px;
+  background: #fff;
+  border-radius: 22px;
+  padding: 34px 28px 26px;
+  text-align: center;
+  box-shadow: 0 30px 60px rgba(26, 11, 61, 0.45);
+}
+.logo { height: 44px; }
+.codigo {
+  margin: 14px 0 0;
+  font-size: clamp(84px, 22vw, 124px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -4px;
+  background: linear-gradient(90deg, var(--magenta), var(--violeta), var(--navy));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+h1 { margin: 6px 0 8px; color: var(--tinta); font-size: 25px; }
+p { margin: 0 auto; color: #4b5068; font-size: 15px; line-height: 1.5; max-width: 380px; }
+.boton {
+  display: inline-block;
+  margin-top: 22px;
+  padding: 13px 30px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #c0168f 0%, #6b21a8 45%, #1e2b5e 100%);
+  color: #fff;
+  font-weight: bold;
+  text-decoration: none;
+  box-shadow: 0 10px 22px rgba(107, 33, 168, 0.35);
+}
+.boton:focus-visible { outline: 3px solid var(--magenta); outline-offset: 3px; }
+small { display: block; margin-top: 16px; color: #8a8fa8; font-size: 12px; }
+@keyframes fondo { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@media (prefers-reduced-motion: reduce) { body { animation: none; } }

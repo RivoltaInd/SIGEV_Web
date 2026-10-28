@@ -20,6 +20,16 @@ public class ApiUtil {
 
     private static final Gson GSON = new Gson();
 
+    // Nombre del atributo de sesion donde queda el usuario que inicio sesion
+    public static final String USUARIO_SESION = "usuario";
+
+    // Correo con caracteres permitidos (lista blanca): no deja pasar < > " ' ni espacios
+    private static final String PATRON_CORREO = "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}";
+
+    public static boolean correoValido(String correo) {
+        return correo != null && correo.length() <= 120 && correo.matches(PATRON_CORREO);
+    }
+
     // Lee el cuerpo de la peticion como objeto JSON; devuelve null si no es JSON valido
     public static JsonObject leerJson(HttpServletRequest request) throws IOException {
         request.setCharacterEncoding("UTF-8");

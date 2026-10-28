@@ -155,7 +155,7 @@ public class ClienteApi extends HttpServlet {
             return "El teléfono debe tener entre 7 y 10 números";
         }
         String correo = ApiUtil.texto(json, "correo");
-        if (correo != null && !correo.matches("[^\\s@]+@[^\\s@]+\\.[^\\s@]+")) {
+        if (correo != null && !ApiUtil.correoValido(correo)) {
             return "El correo no es válido";
         }
         for (Cliente c : clienteDAO.consultarClientes()) {

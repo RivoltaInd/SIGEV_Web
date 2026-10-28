@@ -8,6 +8,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Acceso a datos para la tabla usuario (registro e inicio de sesion, AA5).
@@ -34,6 +36,24 @@ public class UsuarioDAO {
             System.out.println("Error al insertar el usuario: " + e.getMessage());
             return false;
         }
+    }
+
+    // Lista de usuarios SIN el hash de la contrasena (no se consulta esa columna)
+    public List<Usuario> consultarUsuarios() {
+        List<Usuario> lista = new ArrayList<>();
+        String sql = "SELECT id, nombre, correo, rol FROM usuario ORDER BY nombre";
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Usuario u = new Usuario(rs.getString("nombre"), rs.getString("correo"), null, rs.getString("rol"));
+                u.setId(rs.getInt("id"));
+                lista.add(u);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al consultar los usuarios: " + e.getMessage());
+        }
+        return lista;
     }
 
     // Devuelve el usuario con ese correo, o null si no existe

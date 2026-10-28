@@ -1,2 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Context path="/SIGEV_Web"/>
+<Context path="/SIGEV_Web">
+    <!-- La cookie de sesion solo se envia desde el mismo sitio (protege contra CSRF).
+         localhost:5173 y localhost:8080 cuentan como el mismo sitio. -->
+    <CookieProcessor sameSiteCookies="strict"/>
+</Context>

@@ -15,7 +15,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Servicio de registro de usuarios.
+ * Servicio de registro de usuarios. Solo un Admin con sesion iniciada puede
+ * usarlo (lo controla SeguridadFilter con las reglas de Permisos).
  *   POST /api/registro   {nombre, correo, clave, rol?}
  * rol puede ser "Admin" o "Vendedor" (por defecto Vendedor).
  * La contrasena se guarda cifrada con PBKDF2 (ver util.Clave).
@@ -40,16 +41,17 @@ public class RegistroApi extends HttpServlet {
         String clave = ApiUtil.texto(json, "clave");
         String rol = ApiUtil.texto(json, "rol");
 
-        if (nombre == null || nombre.length() < 3) {
-            ApiUtil.error(response, 400, "El nombre debe tener al menos 3 letras");
+        if (nombre == null || nombre.length() < 3 || nombre.length() > 100
+                || !nombre.matches("[A-Za-zÁÉÍÓÚáéíóúÑñ ]+")) {
+            ApiUtil.error(response, 400, "El nombre debe tener entre 3 y 100 letras");
             return;
         }
-        if (correo == null || !correo.matches("[^\\s@]+@[^\\s@]+\\.[^\\s@]+")) {
+        if (!ApiUtil.correoValido(correo)) {
             ApiUtil.error(response, 400, "El correo no es válido");
             return;
         }
-        if (clave == null || clave.length() < 6) {
-            ApiUtil.error(response, 400, "La contraseña debe tener al menos 6 caracteres");
+        if (clave == null || clave.length() < 8) {
+            ApiUtil.error(response, 400, "La contraseña debe tener al menos 8 caracteres");
             return;
         }
         if (rol == null) {

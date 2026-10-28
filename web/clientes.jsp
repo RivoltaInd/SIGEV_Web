@@ -1,5 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%-- Todo dato que viene de la base de datos se muestra con c:out, que lo escapa:
+     si alguien guardo "<script>" se ve como texto y no se ejecuta (evita XSS). --%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -20,11 +22,11 @@
         <tr><th>ID</th><th>Nombre</th><th>Documento</th><th>Telefono</th><th>Email</th></tr>
         <c:forEach var="cli" items="${listaClientes}">
             <tr>
-                <td>${cli.id}</td>
-                <td>${cli.nombre}</td>
-                <td>${cli.documento}</td>
-                <td>${cli.telefono}</td>
-                <td>${cli.email}</td>
+                <td><c:out value="${cli.id}"/></td>
+                <td><c:out value="${cli.nombre}"/></td>
+                <td><c:out value="${cli.documento}"/></td>
+                <td><c:out value="${cli.telefono}"/></td>
+                <td><c:out value="${cli.email}"/></td>
             </tr>
         </c:forEach>
     </table>

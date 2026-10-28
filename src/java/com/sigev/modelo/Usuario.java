@@ -1,10 +1,15 @@
 package com.sigev.modelo;
 
+import java.io.Serializable;
+
 /**
  * Usuario del sistema SIGEV (tabla usuario).
  * claveHash guarda la contrasena cifrada, nunca la contrasena real.
+ * Es Serializable porque se guarda en la sesion de Tomcat.
  */
-public class Usuario {
+public class Usuario implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private int id;
     private String nombre;

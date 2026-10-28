@@ -8,4 +8,70 @@
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
 
+    <!-- Filtros de la API. El orden de los filter-mapping es el orden de ejecucion:
+         primero CORS (responde OPTIONS) y despues la seguridad (sesion y rol). -->
+    <filter>
+        <filter-name>CorsFilter</filter-name>
+        <filter-class>com.sigev.api.CorsFilter</filter-class>
+    </filter>
+    <filter>
+        <filter-name>SeguridadFilter</filter-name>
+        <filter-class>com.sigev.api.SeguridadFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>CorsFilter</filter-name>
+        <url-pattern>/api/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>SeguridadFilter</filter-name>
+        <url-pattern>/api/*</url-pattern>
+    </filter-mapping>
+
+    <!-- Paginas JSP y servlets de formulario (AA2/AA3): exigen sesion y rol.
+         El patron vacio es la raiz (/SIGEV_Web/), que muestra index.jsp. -->
+    <filter>
+        <filter-name>PaginasFilter</filter-name>
+        <filter-class>com.sigev.api.PaginasFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>PaginasFilter</filter-name>
+        <url-pattern></url-pattern>
+        <url-pattern>*.jsp</url-pattern>
+        <url-pattern>/ProductoServlet</url-pattern>
+        <url-pattern>/ClienteServlet</url-pattern>
+        <url-pattern>/VentaServlet</url-pattern>
+    </filter-mapping>
+
+    <!-- Paginas de error propias: nunca se muestra el stack trace ni la version de Tomcat -->
+    <error-page>
+        <error-code>401</error-code>
+        <location>/error/401.html</location>
+    </error-page>
+    <error-page>
+        <error-code>403</error-code>
+        <location>/error/403.html</location>
+    </error-page>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/error/404.html</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/error/500.html</location>
+    </error-page>
+    <error-page>
+        <exception-type>java.lang.Throwable</exception-type>
+        <location>/error/500.html</location>
+    </error-page>
+
+    <!-- Sesion: 30 minutos de inactividad, cookie inaccesible desde JavaScript
+         (HttpOnly) y nunca el id de sesion en la URL -->
+    <session-config>
+        <session-timeout>30</session-timeout>
+        <cookie-config>
+            <http-only>true</http-only>
+        </cookie-config>
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
+
 </web-app>
