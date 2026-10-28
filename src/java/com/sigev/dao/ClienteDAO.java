@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,15 +21,22 @@ import java.util.List;
  */
 public class ClienteDAO {
 
+    // Inserta el cliente y le asigna el id AUTO_INCREMENT generado por MySQL
     public boolean insertarCliente(Cliente cliente) {
         String sql = "INSERT INTO cliente (nombre, documento, telefono, email) VALUES (?, ?, ?, ?)";
         try (Connection con = ConexionBD.obtenerConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, cliente.getNombre());
             ps.setString(2, cliente.getDocumento());
             ps.setString(3, cliente.getTelefono());
             ps.setString(4, cliente.getEmail());
-            return ps.executeUpdate() > 0;
+            int filas = ps.executeUpdate();
+            try (ResultSet claves = ps.getGeneratedKeys()) {
+                if (claves.next()) {
+                    cliente.setId(claves.getInt(1));
+                }
+            }
+            return filas > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

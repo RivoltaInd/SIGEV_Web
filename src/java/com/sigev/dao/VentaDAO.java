@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,12 +31,19 @@ public class VentaDAO {
                 for (DetalleVenta d : venta.getDetalles()) {
                     double total = d.getSubtotal();
 
-                    try (PreparedStatement psInsert = con.prepareStatement(sqlInsert)) {
+                    try (PreparedStatement psInsert = con.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS)) {
                         psInsert.setInt(1, venta.getIdCliente());
                         psInsert.setInt(2, d.getIdProducto());
                         psInsert.setInt(3, d.getCantidad());
                         psInsert.setDouble(4, total);
                         psInsert.executeUpdate();
+
+                        // Queda el id de la ultima linea insertada (la API registra una linea por venta)
+                        try (ResultSet claves = psInsert.getGeneratedKeys()) {
+                            if (claves.next()) {
+                                venta.setId(claves.getInt(1));
+                            }
+                        }
                     }
 
                     try (PreparedStatement psStock = con.prepareStatement(sqlStock)) {
