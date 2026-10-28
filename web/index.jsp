@@ -27,10 +27,10 @@
             <input type="text" id="categoria" name="categoria" required>
 
             <label for="precio">Precio</label>
-            <input type="number" step="0.01" id="precio" name="precio" required>
+           <input type="number" min="0" step="0.01" id="precio" name="precio" required>
 
             <label for="stock">Stock</label>
-            <input type="number" id="stock" name="stock" required>
+           <input type="number" min="0" id="stock" name="stock" required>
 
             <button type="submit">Registrar Producto</button>
         </form>

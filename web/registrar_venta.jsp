@@ -28,14 +28,14 @@
         <br/><br/>
 
         <table border="1">
-            <tr><th>Incluir</th><th>Producto</th><th>Precio</th><th>Stock</th><th>Cantidad</th></tr>
+            <tr><th>Producto</th><th>Precio</th><th>Stock</th><th>Cantidad</th></tr>
             <c:forEach var="prod" items="${listaProductos}">
                 <tr>
                     <td>
                         <input type="hidden" name="idProducto" value="${prod.codigo}"/>
                         <input type="hidden" name="precioUnitario" value="${prod.precio}"/>
+                        ${prod.nombre}
                     </td>
-                    <td>${prod.nombre}</td>
                     <td>${prod.precio}</td>
                     <td>${prod.stock}</td>
                     <td><input type="number" name="cantidad" min="0" max="${prod.stock}" value="0"/></td>
