@@ -7,7 +7,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.Map;
@@ -39,8 +38,8 @@ public class PaginasFilter extends HttpFilter {
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        HttpSession sesion = request.getSession(false);
-        Usuario usuario = sesion == null ? null : (Usuario) sesion.getAttribute(ApiUtil.USUARIO_SESION);
+        // Revisa en la BD que siga activo: si el Admin lo desactivo, la sesion se corta ya
+        Usuario usuario = ApiUtil.usuarioVigente(request);
         if (usuario == null) {
             response.sendError(401);
             return;

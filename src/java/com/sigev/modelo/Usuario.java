@@ -5,17 +5,19 @@ import java.io.Serializable;
 /**
  * Usuario del sistema SIGEV (tabla usuario).
  * claveHash guarda la contrasena cifrada, nunca la contrasena real.
+ * activo = false significa que el Admin desactivo la cuenta: no puede entrar.
  * Es Serializable porque se guarda en la sesion de Tomcat.
  */
 public class Usuario implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     private int id;
     private String nombre;
     private String correo;
     private String claveHash;
     private String rol;
+    private boolean activo = true;
 
     public Usuario() {
     }
@@ -65,5 +67,13 @@ public class Usuario implements Serializable {
 
     public void setRol(String rol) {
         this.rol = rol;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }

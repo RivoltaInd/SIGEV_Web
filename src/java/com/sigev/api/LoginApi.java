@@ -20,7 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Servicio de inicio de sesion.
  *   POST /api/login   {correo, clave, recordar?}
  * Responde 200 con {mensaje, nombre, correo, rol} si la autenticacion es correcta,
- * 401 si el correo o la contrasena no coinciden y 429 si hubo demasiados intentos.
+ * 401 si el correo o la contrasena no coinciden, 403 si la cuenta esta desactivada
+ * y 429 si hubo demasiados intentos.
  *
  * Si es correcta, crea una sesion nueva en el servidor con el usuario. La sesion
  * dura 30 minutos de inactividad, u 8 horas si marco "Recordarme".
@@ -66,6 +67,13 @@ public class LoginApi extends HttpServlet {
             return;
         }
         intentos.remove(correo);
+
+        // Solo se avisa despues de verificar la clave: asi no se revela a un extraño
+        // que la cuenta existe
+        if (!usuario.isActivo()) {
+            ApiUtil.error(response, 403, "Tu cuenta está desactivada. Habla con un Administrador");
+            return;
+        }
 
         // Sesion nueva: se descarta cualquier sesion anterior (evita fijacion de sesion)
         HttpSession anterior = request.getSession(false);

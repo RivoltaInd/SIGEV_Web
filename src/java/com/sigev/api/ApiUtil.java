@@ -6,8 +6,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 
+import com.sigev.dao.UsuarioDAO;
+import com.sigev.modelo.Usuario;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.Map;
@@ -28,6 +32,29 @@ public class ApiUtil {
 
     public static boolean correoValido(String correo) {
         return correo != null && correo.length() <= 120 && correo.matches(PATRON_CORREO);
+    }
+
+    private static final UsuarioDAO USUARIO_DAO = new UsuarioDAO();
+
+    /**
+     * Usuario de la sesion, revisado contra la base de datos en CADA peticion.
+     * Si el Admin lo desactivo (o lo borraron) se cierra la sesion de inmediato
+     * y devuelve null. Si le cambiaron el rol, el cambio aplica ya mismo.
+     */
+    public static Usuario usuarioVigente(HttpServletRequest request) {
+        HttpSession sesion = request.getSession(false);
+        Usuario enSesion = sesion == null ? null : (Usuario) sesion.getAttribute(USUARIO_SESION);
+        if (enSesion == null) {
+            return null;
+        }
+        Usuario actual = USUARIO_DAO.consultarPorId(enSesion.getId());
+        if (actual == null || !actual.isActivo()) {
+            sesion.invalidate();
+            return null;
+        }
+        actual.setClaveHash(null);   // el hash nunca queda en la sesion
+        sesion.setAttribute(USUARIO_SESION, actual);
+        return actual;
     }
 
     // Lee el cuerpo de la peticion como objeto JSON; devuelve null si no es JSON valido

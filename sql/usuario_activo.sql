@@ -1,0 +1,2 @@
+USE sigev_db;
+ALTER TABLE usuario ADD COLUMN activo TINYINT(1) NOT NULL DEFAULT 1;

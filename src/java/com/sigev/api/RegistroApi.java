@@ -50,8 +50,10 @@ public class RegistroApi extends HttpServlet {
             ApiUtil.error(response, 400, "El correo no es válido");
             return;
         }
-        if (clave == null || clave.length() < 8) {
-            ApiUtil.error(response, 400, "La contraseña debe tener al menos 8 caracteres");
+        // Mismas reglas que el cambio de contrasena (ver CambiarClaveApi)
+        String errorClave = clave == null ? "Ingrese una contraseña" : CambiarClaveApi.validarNueva(clave, null, correo);
+        if (errorClave != null) {
+            ApiUtil.error(response, 400, errorClave.replace("La contraseña nueva", "La contraseña"));
             return;
         }
         if (rol == null) {

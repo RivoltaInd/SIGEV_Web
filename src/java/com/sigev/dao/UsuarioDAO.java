@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Acceso a datos para la tabla usuario (registro e inicio de sesion, AA5).
+ * Acceso a datos para la tabla usuario (registro, inicio de sesion,
+ * cambio de contrasena y activacion/desactivacion, AA5).
  */
 public class UsuarioDAO {
 
@@ -41,13 +42,14 @@ public class UsuarioDAO {
     // Lista de usuarios SIN el hash de la contrasena (no se consulta esa columna)
     public List<Usuario> consultarUsuarios() {
         List<Usuario> lista = new ArrayList<>();
-        String sql = "SELECT id, nombre, correo, rol FROM usuario ORDER BY nombre";
+        String sql = "SELECT id, nombre, correo, rol, activo FROM usuario ORDER BY nombre";
         try (Connection con = ConexionBD.obtenerConexion();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 Usuario u = new Usuario(rs.getString("nombre"), rs.getString("correo"), null, rs.getString("rol"));
                 u.setId(rs.getInt("id"));
+                u.setActivo(rs.getBoolean("activo"));
                 lista.add(u);
             }
         } catch (SQLException e) {
@@ -56,12 +58,41 @@ public class UsuarioDAO {
         return lista;
     }
 
-    // Devuelve el usuario con ese correo, o null si no existe
+    // Devuelve el usuario con ese correo (con su hash, para verificar la clave), o null
     public Usuario consultarPorCorreo(String correo) {
-        String sql = "SELECT id, nombre, correo, clave_hash, rol FROM usuario WHERE correo = ?";
+        return consultarUno("SELECT id, nombre, correo, clave_hash, rol, activo FROM usuario WHERE correo = ?", correo);
+    }
+
+    // Devuelve el usuario con ese id (con su hash), o null
+    public Usuario consultarPorId(int id) {
+        return consultarUno("SELECT id, nombre, correo, clave_hash, rol, activo FROM usuario WHERE id = ?", id);
+    }
+
+    public boolean actualizarClave(int id, String claveHash) {
+        return actualizar("UPDATE usuario SET clave_hash = ? WHERE id = ?", claveHash, id);
+    }
+
+    public boolean cambiarActivo(int id, boolean activo) {
+        return actualizar("UPDATE usuario SET activo = ? WHERE id = ?", activo, id);
+    }
+
+    // Cuantos Admin activos hay (para no dejar el sistema sin ningun Admin)
+    public int contarAdminsActivos() {
+        String sql = "SELECT COUNT(*) FROM usuario WHERE rol = 'Admin' AND activo = 1";
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (SQLException e) {
+            System.out.println("Error al contar administradores: " + e.getMessage());
+            return 0;
+        }
+    }
+
+    private Usuario consultarUno(String sql, Object valor) {
         try (Connection con = ConexionBD.obtenerConexion();
              PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, correo);
+            ps.setObject(1, valor);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Usuario u = new Usuario(
@@ -70,6 +101,7 @@ public class UsuarioDAO {
                             rs.getString("clave_hash"),
                             rs.getString("rol"));
                     u.setId(rs.getInt("id"));
+                    u.setActivo(rs.getBoolean("activo"));
                     return u;
                 }
             }
@@ -77,5 +109,17 @@ public class UsuarioDAO {
             System.out.println("Error al consultar el usuario: " + e.getMessage());
         }
         return null;
+    }
+
+    private boolean actualizar(String sql, Object valor, int id) {
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setObject(1, valor);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error al actualizar el usuario: " + e.getMessage());
+            return false;
+        }
     }
 }

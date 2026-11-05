@@ -7,7 +7,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
@@ -42,8 +41,8 @@ public class SeguridadFilter extends HttpFilter {
             return;
         }
 
-        HttpSession sesion = request.getSession(false);
-        Usuario usuario = sesion == null ? null : (Usuario) sesion.getAttribute(ApiUtil.USUARIO_SESION);
+        // Revisa en la BD que siga activo: si el Admin lo desactivo, la sesion se corta ya
+        Usuario usuario = ApiUtil.usuarioVigente(request);
         if (usuario == null) {
             ApiUtil.error(response, 401, "Debe iniciar sesión");
             return;

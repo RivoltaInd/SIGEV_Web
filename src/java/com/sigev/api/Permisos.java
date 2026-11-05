@@ -24,7 +24,8 @@ public class Permisos {
             "productos", Set.of("GET"),                 // solo consultar precios y stock
             "clientes", Set.of("GET", "POST", "PUT"),   // atender clientes, sin eliminar
             "ventas", Set.of("GET", "POST"),            // registrar y ver ventas
-            "sesion", Set.of("GET")                     // saber quien esta conectado
+            "sesion", Set.of("GET"),                    // saber quien esta conectado
+            "cambiar-clave", Set.of("POST")             // cambiar SU PROPIA contrasena
     );
 
     public static boolean permitido(String rol, String metodo, String recurso) {
