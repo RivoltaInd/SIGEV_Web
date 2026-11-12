@@ -2,3 +2,10 @@
 /dist/
 /src/java/db.properties
 /nbproject/private/
+
+# Archivos locales de asistentes de IA: pueden guardar comandos con datos sensibles
+.claude/settings.local.json
+CLAUDE.local.md
+# Nunca subir archivos de variables de entorno
+.env
+.env.*

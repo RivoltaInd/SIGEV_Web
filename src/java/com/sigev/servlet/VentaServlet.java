@@ -54,33 +54,47 @@ public class VentaServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int idCliente = Integer.parseInt(request.getParameter("idCliente"));
-
-        // Los tres arreglos llegan en el mismo orden (una posicion por fila de la tabla)
+        // Los dos arreglos llegan en el mismo orden (una posicion por fila de la tabla)
         String[] idsProducto = request.getParameterValues("idProducto");
-        String[] precios = request.getParameterValues("precioUnitario");
         String[] cantidades = request.getParameterValues("cantidad");
 
-        List<DetalleVenta> detalles = new ArrayList<>();
+        boolean ventaRegistrada = false;
 
-        if (idsProducto != null) {
-            for (int i = 0; i < idsProducto.length; i++) {
+        // Todo lo que llega del navegador se valida aqui: el usuario puede cambiar
+        // cualquier campo del formulario (incluso los ocultos) antes de enviarlo.
+        try {
+            int idCliente = Integer.parseInt(request.getParameter("idCliente"));
+            List<DetalleVenta> detalles = new ArrayList<>();
+            boolean datosValidos = clienteDAO.consultarClientePorId(idCliente) != null
+                    && idsProducto != null && cantidades != null
+                    && idsProducto.length == cantidades.length;
+
+            for (int i = 0; datosValidos && i < idsProducto.length; i++) {
                 int cantidad = Integer.parseInt(cantidades[i]);
 
                 // Solo se incluyen los productos donde el usuario puso cantidad > 0
                 if (cantidad > 0) {
-                    int idProducto = Integer.parseInt(idsProducto[i]);
-                    double precioUnitario = Double.parseDouble(precios[i]);
-                    detalles.add(new DetalleVenta(idProducto, cantidad, precioUnitario));
+                    // SEGURIDAD: el precio se toma de la base de datos, nunca del
+                    // formulario. Antes venia en un campo oculto y cualquiera podia
+                    // cambiarlo para vender a un precio inventado.
+                    Producto producto = productoDAO.consultarProductoPorCodigo(Integer.parseInt(idsProducto[i]));
+                    if (producto == null) {
+                        datosValidos = false;
+                    } else {
+                        detalles.add(new DetalleVenta(producto.getCodigo(), cantidad, producto.getPrecio()));
+                    }
+                } else if (cantidad < 0) {
+                    datosValidos = false;
                 }
             }
-        }
 
-        boolean ventaRegistrada = false;
-
-        if (!detalles.isEmpty()) {
-            Venta venta = new Venta(idCliente, detalles);
-            ventaRegistrada = ventaDAO.insertarVenta(venta);
+            if (datosValidos && !detalles.isEmpty()) {
+                Venta venta = new Venta(idCliente, detalles);
+                ventaRegistrada = ventaDAO.insertarVenta(venta);
+            }
+        } catch (NumberFormatException e) {
+            // Un dato que no es numero: no se registra nada
+            ventaRegistrada = false;
         }
 
         request.setAttribute("ventaRegistrada", ventaRegistrada);

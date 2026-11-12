@@ -36,6 +36,9 @@ public class ApiUtil {
 
     private static final UsuarioDAO USUARIO_DAO = new UsuarioDAO();
 
+    // Tamano maximo del JSON que acepta la API (64 KB)
+    private static final long MAX_BYTES_JSON = 64 * 1024;
+
     /**
      * Usuario de la sesion, revisado contra la base de datos en CADA peticion.
      * Si el Admin lo desactivo (o lo borraron) se cierra la sesion de inmediato
@@ -60,6 +63,11 @@ public class ApiUtil {
     // Lee el cuerpo de la peticion como objeto JSON; devuelve null si no es JSON valido
     public static JsonObject leerJson(HttpServletRequest request) throws IOException {
         request.setCharacterEncoding("UTF-8");
+        // Ningun formulario de SIGEV pasa de unos pocos KB: un cuerpo gigante solo
+        // buscaria agotar la memoria del servidor, asi que se rechaza
+        if (request.getContentLengthLong() > MAX_BYTES_JSON) {
+            return null;
+        }
         try {
             JsonElement json = JsonParser.parseReader(request.getReader());
             return json.isJsonObject() ? json.getAsJsonObject() : null;

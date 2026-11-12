@@ -26,15 +26,23 @@ public class Clave {
     }
 
     public static boolean verificar(String clave, String guardado) {
+        if (clave == null || guardado == null) {
+            return false;
+        }
         String[] partes = guardado.split(":");
         if (partes.length != 2) {
             return false;
         }
-        Base64.Decoder b64 = Base64.getDecoder();
-        byte[] sal = b64.decode(partes[0]);
-        byte[] esperado = b64.decode(partes[1]);
-        // MessageDigest.isEqual compara en tiempo constante
-        return MessageDigest.isEqual(esperado, calcular(clave, sal));
+        try {
+            Base64.Decoder b64 = Base64.getDecoder();
+            byte[] sal = b64.decode(partes[0]);
+            byte[] esperado = b64.decode(partes[1]);
+            // MessageDigest.isEqual compara en tiempo constante
+            return MessageDigest.isEqual(esperado, calcular(clave, sal));
+        } catch (IllegalArgumentException e) {
+            // Hash guardado con formato danado: se trata como clave incorrecta
+            return false;
+        }
     }
 
     private static byte[] calcular(String clave, byte[] sal) {

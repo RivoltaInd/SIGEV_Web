@@ -8,6 +8,17 @@
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
 
+    <!-- Cabeceras de seguridad en todas las respuestas. Va primero para que tambien
+         queden en las respuestas 401/403 que cortan los filtros siguientes. -->
+    <filter>
+        <filter-name>CabecerasFilter</filter-name>
+        <filter-class>com.sigev.api.CabecerasFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>CabecerasFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
     <!-- Filtros de la API. El orden de los filter-mapping es el orden de ejecucion:
          primero CORS (responde OPTIONS) y despues la seguridad (sesion y rol). -->
     <filter>

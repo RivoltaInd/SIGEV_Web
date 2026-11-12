@@ -34,6 +34,11 @@ public class LoginApi extends HttpServlet {
 
     private static final int MAX_INTENTOS = 5;
     private static final long BLOQUEO_MS = 5 * 60 * 1000;   // 5 minutos
+    private static final int MAX_CORREOS_VIGILADOS = 10000;
+
+    // Hash de una clave aleatoria que nadie conoce: solo sirve para gastar el mismo
+    // tiempo cuando el correo no existe (ver doPost)
+    private static final String HASH_RELLENO = Clave.cifrar(java.util.UUID.randomUUID().toString());
 
     private final UsuarioDAO usuarioDAO = new UsuarioDAO();
 
@@ -51,6 +56,12 @@ public class LoginApi extends HttpServlet {
             ApiUtil.error(response, 400, "Ingrese correo y contraseña");
             return;
         }
+        // Limites de tamano: calcular PBKDF2 sobre un texto enorme gastaria la CPU
+        // del servidor, y ningun correo o clave valido supera estos largos
+        if (correo.length() > 120 || clave.length() > 100) {
+            ApiUtil.error(response, 401, "Correo o contraseña incorrectos");
+            return;
+        }
         correo = correo.toLowerCase();
 
         if (estaBloqueado(correo)) {
@@ -60,8 +71,13 @@ public class LoginApi extends HttpServlet {
 
         Usuario usuario = usuarioDAO.consultarPorCorreo(correo);
 
-        // El mismo mensaje para correo inexistente o clave errada: no se revela cual fallo
-        if (usuario == null || !Clave.verificar(clave, usuario.getClaveHash())) {
+        // El mismo mensaje para correo inexistente o clave errada: no se revela cual fallo.
+        // Si el correo no existe igual se calcula un hash (contra uno de relleno) para
+        // que la respuesta tarde lo mismo: sin esto, midiendo el tiempo se podria
+        // saber que correos estan registrados.
+        String hash = usuario != null ? usuario.getClaveHash() : HASH_RELLENO;
+        boolean claveCorrecta = Clave.verificar(clave, hash);
+        if (usuario == null || !claveCorrecta) {
             registrarFallo(correo);
             ApiUtil.error(response, 401, "Correo o contraseña incorrectos");
             return;
@@ -107,6 +123,15 @@ public class LoginApi extends HttpServlet {
     }
 
     private void registrarFallo(String correo) {
+        // Si alguien prueba miles de correos distintos, se borran los registros ya
+        // vencidos para que este mapa no crezca hasta llenar la memoria
+        if (intentos.size() >= MAX_CORREOS_VIGILADOS) {
+            long ahora = System.currentTimeMillis();
+            intentos.values().removeIf(datos -> ahora - datos[1] > BLOQUEO_MS);
+            if (intentos.size() >= MAX_CORREOS_VIGILADOS) {
+                intentos.clear();
+            }
+        }
         intentos.compute(correo, (c, datos) -> datos == null
                 ? new long[]{1, System.currentTimeMillis()}
                 : new long[]{datos[0] + 1, System.currentTimeMillis()});

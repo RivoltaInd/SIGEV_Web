@@ -87,9 +87,16 @@ public class VentaApi extends HttpServlet {
         detalles.add(new DetalleVenta(codigoProducto, cantidad, producto.getPrecio()));
         Venta venta = new Venta(idCliente, detalles);
 
-        // insertarVenta devuelve false si otra venta se llevo el stock al mismo tiempo
+        // insertarVenta devuelve false por dos motivos distintos: otra venta se llevo
+        // el stock al mismo tiempo, o fallo la base de datos. Se vuelve a leer el
+        // producto para saber cual fue y no decir "sin stock" cuando no es verdad.
         if (!ventaDAO.insertarVenta(venta)) {
-            ApiUtil.error(response, 409, "No se pudo registrar la venta: stock insuficiente");
+            Producto actual = productoDAO.consultarProductoPorCodigo(codigoProducto);
+            if (actual != null && actual.getStock() < cantidad) {
+                ApiUtil.error(response, 409, "Stock insuficiente. Disponible: " + actual.getStock());
+            } else {
+                ApiUtil.error(response, 500, "No se pudo registrar la venta. Intente de nuevo más tarde");
+            }
             return;
         }
         ApiUtil.responder(response, 201, aJson(venta.getId(), idCliente, codigoProducto, cantidad,

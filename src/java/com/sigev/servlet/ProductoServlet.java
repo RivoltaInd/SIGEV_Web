@@ -45,11 +45,25 @@ public class ProductoServlet extends HttpServlet {
         // Se leen los datos enviados desde el formulario HTML
         String nombre = request.getParameter("nombre");
         String categoria = request.getParameter("categoria");
-        double precio = Double.parseDouble(request.getParameter("precio"));
-        int stock = Integer.parseInt(request.getParameter("stock"));
 
-        Producto nuevoProducto = new Producto(nombre, categoria, precio, stock);
-        boolean insertado = productoDAO.insertarProducto(nuevoProducto);
+        // Validacion en el servidor (las mismas reglas de la API): el "required" y
+        // el "min" del formulario se pueden saltar desde el navegador
+        boolean insertado = false;
+        try {
+            double precio = Double.parseDouble(request.getParameter("precio"));
+            int stock = Integer.parseInt(request.getParameter("stock"));
+            boolean valido = nombre != null && !nombre.isBlank() && nombre.length() <= 100
+                    && (categoria == null || categoria.length() <= 50)
+                    && precio > 0 && !Double.isInfinite(precio) && !Double.isNaN(precio)
+                    && stock >= 0;
+            if (valido) {
+                Producto nuevoProducto = new Producto(nombre.trim(), categoria, precio, stock);
+                insertado = productoDAO.insertarProducto(nuevoProducto);
+            }
+        } catch (NumberFormatException | NullPointerException e) {
+            // Precio o stock vacios o que no son numeros: no se inserta
+            insertado = false;
+        }
 
         request.setAttribute("mensaje", insertado ? "Producto registrado correctamente." : "Error al registrar el producto.");
 

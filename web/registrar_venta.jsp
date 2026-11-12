@@ -35,7 +35,6 @@
                 <tr>
                     <td>
                         <input type="hidden" name="idProducto" value="<c:out value='${prod.codigo}'/>"/>
-                        <input type="hidden" name="precioUnitario" value="<c:out value='${prod.precio}'/>"/>
                         <c:out value="${prod.nombre}"/>
                     </td>
                     <td><c:out value="${prod.precio}"/></td>

@@ -36,8 +36,17 @@ public class ClienteServlet extends HttpServlet {
         String telefono = request.getParameter("telefono");
         String email = request.getParameter("email");
 
-        Cliente cliente = new Cliente(nombre, documento, telefono, email);
-        new ClienteDAO().insertarCliente(cliente);
+        // Validacion en el servidor, con las mismas reglas de ClienteApi: lo que
+        // valida el formulario se puede saltar desde el navegador
+        boolean valido = nombre != null && nombre.length() >= 3 && nombre.length() <= 100
+                && nombre.matches("[A-Za-zÁÉÍÓÚáéíóúÑñ ]+")
+                && documento != null && documento.matches("\\d{6,10}")
+                && (telefono == null || telefono.isBlank() || telefono.matches("\\d{7,10}"))
+                && (email == null || email.isBlank() || com.sigev.api.ApiUtil.correoValido(email));
+        if (valido) {
+            Cliente cliente = new Cliente(nombre.trim(), documento, telefono, email);
+            new ClienteDAO().insertarCliente(cliente);
+        }
 
         doGet(request, response);
     }

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(**/db.properties)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/nbproject/private/**)"
+    ]
+  }
+}
